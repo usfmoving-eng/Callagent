@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: usf-moving-ai-agent
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: PORT
+        generateValue: true
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: BOOKING_SHEET_ID
+        sync: false
+      - key: GOOGLE_SHEETS_CREDS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: EMAIL_ADDRESS
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: MANAGER_EMAIL
+        sync: false
+      - key: SMTP_SERVER
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: FLASK_ENV
+        value: production
+      - key: ENABLE_CALL_RECORDING
+        value: True
