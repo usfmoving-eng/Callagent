@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  callagent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: callagent-app
+    ports:
+      - "${PORT:-5000}:5000"
+    environment:
+      # Flask Configuration
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - FLASK_DEBUG=${FLASK_DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY:-usf-moving-secret-key-change-in-production}
+      - PORT=5000
+      
+      # Company Information
+      - COMPANY_NAME=${COMPANY_NAME:-USF Moving Company}
+      - COMPANY_PHONE=${COMPANY_PHONE:-(281) 743-4503}
+      - OFFICE_ADDRESS=${OFFICE_ADDRESS:-2800 Rolido Dr Apt 238, Houston, TX 77063}
+      - WEBSITE=${WEBSITE:-https://www.usfhoustonmoving.com/}
+      
+      # Twilio Configuration (REQUIRED)
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - TWILIO_SPEECH_LANGUAGE=${TWILIO_SPEECH_LANGUAGE:-en-US}
+      - TWILIO_SPEECH_ENHANCED=${TWILIO_SPEECH_ENHANCED:-true}
+      - TWILIO_SPEECH_MODEL=${TWILIO_SPEECH_MODEL:-phone_call}
+      - TWILIO_SPEECH_HINTS=${TWILIO_SPEECH_HINTS}
+      
+      # Google APIs (REQUIRED)
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - GOOGLE_SHEETS_CREDS=${GOOGLE_SHEETS_CREDS}
+      - BOOKING_SHEET_ID=${BOOKING_SHEET_ID}
+      
+      # OpenAI Configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      
+      # Email Configuration
+      - EMAIL_ADDRESS=${EMAIL_ADDRESS}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - SMTP_SERVER=${SMTP_SERVER:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - MANAGER_EMAIL=${MANAGER_EMAIL}
+      
+      # Pricing Configuration
+      - MILEAGE_FREE_RADIUS=${MILEAGE_FREE_RADIUS:-20}
+      - MILEAGE_RATE=${MILEAGE_RATE:-1.0}
+      - LONG_DISTANCE_PHONE=${LONG_DISTANCE_PHONE:-(281) 743-4503}
+      
+      # Feature Flags
+      - ENABLE_CALL_RECORDING=${ENABLE_CALL_RECORDING:-True}
+      - ENABLE_OUTBOUND_CALLS=${ENABLE_OUTBOUND_CALLS:-True}
+      - ENABLE_SMS_NOTIFICATIONS=${ENABLE_SMS_NOTIFICATIONS:-True}
+      - ENABLE_EMAIL_NOTIFICATIONS=${ENABLE_EMAIL_NOTIFICATIONS:-True}
+      - ENABLE_BACKLINK_AUTOMATION=${ENABLE_BACKLINK_AUTOMATION:-False}
+      
+      # Voice Settings
+      - VOICE_GENDER=${VOICE_GENDER:-female}
+      - VOICE_NAME=${VOICE_NAME:-Polly.Joanna}
+      
+      # Rate Limiting
+      - MAX_OUTBOUND_CALLS_PER_DAY=${MAX_OUTBOUND_CALLS_PER_DAY:-50}
+      - MAX_BACKLINK_EMAILS_PER_DAY=${MAX_BACKLINK_EMAILS_PER_DAY:-5}
+      
+      # Application Configuration
+      - BASE_URL=${BASE_URL:-http://localhost:5000}
+    
+    env_file:
+      - .env
+    
+    volumes:
+      # Mount logs directory if you want persistent logs
+      - ./logs:/app/logs
+    
+    restart: unless-stopped
+    
+    networks:
+      - callagent-network
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  callagent-network:
+    driver: bridge
+
+volumes:
+  logs:
+    driver: local
