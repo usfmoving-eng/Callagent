@@ -41,5 +41,6 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:5000/health', timeout=5)" || exit 1
 
-# Run with gunicorn (production-ready)
-CMD ["gunicorn", "--workers=2", "--threads=4", "--timeout=120", "--bind=0.0.0.0:5000", "--access-logfile=-", "--error-logfile=-", "app:app"]
+# Run with gunicorn (production-ready) - Optimized for AWS EC2 t3.xlarge (4 vCPUs)
+# Using preload to initialize app once and share across workers (prevents Google Sheets rate limit)
+CMD ["gunicorn", "--workers=4", "--threads=4", "--timeout=120", "--preload", "--bind=0.0.0.0:5000", "--access-logfile=-", "--error-logfile=-", "app:app"]
